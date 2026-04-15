@@ -1,0 +1,8 @@
+pub mod admin;
+pub mod comment;
+pub mod like;
+pub mod message;
+pub mod post;
+pub mod share;
+pub mod tag;
+pub mod view;
