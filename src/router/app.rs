@@ -13,8 +13,8 @@ pub fn build_app(state: AppState) -> Router {
         .allow_headers(Any);
 
     Router::new()
-        .merge(public::routes())
-        .merge(dashboard::routes(state.clone()))
+        .nest("/api", public::routes())
+        .nest("/api/dashboard", dashboard::routes(state.clone()))
         .layer(cors_layer)
         .with_state(state)
 }

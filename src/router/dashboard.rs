@@ -10,24 +10,95 @@ use crate::{handlers, middleware::auth::jwt_auth_middleware, state::AppState};
 pub fn routes(state: AppState) -> Router<AppState> {
     Router::new()
         .route(
-            "/api/dashboard/post",
+            "/post",
             post(handlers::dashboard_post::post)
+                .get(handlers::dashboard_post::get)
                 .put(handlers::dashboard_post::put)
                 .delete(handlers::dashboard_post::delete),
         )
         .route(
-            "/api/dashboard/tag",
+            "/post/upload",
+            post(handlers::dashboard_post::upload),
+        )
+        .route(
+            "/post/parse",
+            post(handlers::dashboard_post::parse),
+        )
+        .route(
+            "/post/check",
+            post(handlers::dashboard_post::check),
+        )
+        .route(
+            "/post/export",
+            post(handlers::dashboard_post::export),
+        )
+        .route(
+            "/post/add",
+            post(handlers::dashboard_post::add),
+        )
+        .route(
+            "/tag",
             post(handlers::dashboard_tag::post)
+                .get(handlers::dashboard_tag::get)
                 .put(handlers::dashboard_tag::put)
                 .delete(handlers::dashboard_tag::delete),
         )
         .route(
-            "/api/dashboard/comment",
-            put(handlers::dashboard_comment::put).delete(handlers::dashboard_comment::delete),
+            "/category",
+            put(handlers::dashboard_category::put)
+                .get(handlers::dashboard_category::get)
+                .delete(handlers::dashboard_category::delete),
         )
         .route(
-            "/api/dashboard/message",
-            put(handlers::dashboard_message::put).delete(handlers::dashboard_message::delete),
+            "/comment",
+            put(handlers::dashboard_comment::put)
+                .get(handlers::dashboard_comment::get)
+                .delete(handlers::dashboard_comment::delete),
+        )
+        .route(
+            "/view",
+            put(handlers::dashboard_view::put)
+                .get(handlers::dashboard_view::get)
+                .delete(handlers::dashboard_view::delete),
+        )
+        .route(
+            "/share",
+            put(handlers::dashboard_share::put)
+                .get(handlers::dashboard_share::get)
+                .delete(handlers::dashboard_share::delete),
+        )
+        .route(
+            "/like",
+            put(handlers::dashboard_like::put)
+                .get(handlers::dashboard_like::get)
+                .delete(handlers::dashboard_like::delete),
+        )
+        .route(
+            "/message",
+            put(handlers::dashboard_message::put)
+                .get(handlers::dashboard_message::get)
+                .delete(handlers::dashboard_message::delete),
+        )
+        .route(
+            "/subscribe",
+            put(handlers::dashboard_subscribe::put)
+                .get(handlers::dashboard_subscribe::get)
+                .delete(handlers::dashboard_subscribe::delete),
+        )
+        .route(
+            "/zhuanlan",
+            put(handlers::dashboard_zhuanlan::put)
+                .get(handlers::dashboard_zhuanlan::get)
+                .delete(handlers::dashboard_zhuanlan::delete),
+        )
+        .route("/db/init", post(handlers::dashboard_db::init))
+        .route(
+            "/db/backup",
+            post(handlers::dashboard_db::backup),
+        )
+        .route(
+            "/db/export",
+            post(handlers::dashboard_db::export),
         )
         .layer(axum_middleware::from_fn_with_state(
             state,

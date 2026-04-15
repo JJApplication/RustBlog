@@ -9,26 +9,26 @@ use crate::{handlers, state::AppState};
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/hello", get(handlers::hello::handle))
-        .route("/api/admin/login", post(handlers::admin_login::handle))
-        .route("/api/article/posts", get(handlers::article_posts::handle))
-        .route("/api/article/post", get(handlers::article_post::handle))
-        .route("/api/article/tags", get(handlers::article_tags::handle))
-        .route("/api/article/tag", get(handlers::article_tag::handle))
-        .route("/api/article/brother", get(handlers::article_brother::handle))
-        .route("/api/article/search", get(handlers::article_search::handle))
+        .route("/admin/login", post(handlers::admin_login::handle))
+        .route("/article/posts", get(handlers::article_posts::handle))
+        .route("/article/post", get(handlers::article_post::handle))
+        .route("/article/tags", get(handlers::article_tags::handle))
+        .route("/article/tag", get(handlers::article_tag::handle))
+        .route("/article/brother", get(handlers::article_brother::handle))
+        .route("/article/search", get(handlers::article_search::handle))
         .route(
-            "/api/article/comments",
+            "/article/comments",
             get(handlers::article_comments::get).post(handlers::article_comments::post),
         )
         .route(
-            "/api/article/likes",
+            "/article/likes",
             get(handlers::article_likes::get).post(handlers::article_likes::post),
         )
-        .route("/api/article/views", get(handlers::article_views::handle))
-        .route("/api/article/archive", get(handlers::article_archive::handle))
-        .route("/api/article/archives", get(handlers::article_archives::handle))
+        .route("/article/views", get(handlers::article_views::handle))
+        .route("/article/archive", get(handlers::article_archive::handle))
+        .route("/article/archives", get(handlers::article_archives::handle))
         .route(
-            "/api/message",
+            "/message",
             get(handlers::message::get).post(handlers::message::post),
         )
 }
