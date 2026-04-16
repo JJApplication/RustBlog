@@ -8,9 +8,9 @@ fn now_utc() -> DateTimeUtc {
     Utc::now().into()
 }
 
-/// 文章实体
+/// 专栏实体
 #[derive(Clone, Debug, PartialEq, Serialize, DeriveEntityModel)]
-#[sea_orm(table_name = "blog_post")]
+#[sea_orm(table_name = "blog_zhuanlan")]
 pub struct Model {
     /// 主键
     #[sea_orm(primary_key, column_name = "primary_id")]
@@ -23,30 +23,16 @@ pub struct Model {
     pub create_by: i32,
     /// 更新人ID
     pub update_by: i32,
-    /// 文章唯一名
+    /// 链接名
     pub name: String,
     /// 标题
     pub title: String,
     /// 日期
     pub date: String,
-    /// 完整日期
-    pub date_plus: String,
-    /// 更新日期
-    #[serde(rename = "update")]
-    pub update_date: String,
-    /// 摘要
-    #[serde(rename = "abstract")]
-    pub abstract_text: String,
-    /// 内容
+    /// 文章列表（逗号分隔）
+    pub posts: String,
+    /// 描述
     pub content: String,
-    /// 标签
-    pub tags: String,
-    /// 分类
-    pub categories: String,
-    /// 置顶标记
-    pub pin: i32,
-    /// 加锁标记
-    pub lock: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

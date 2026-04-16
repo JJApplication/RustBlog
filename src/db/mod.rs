@@ -27,6 +27,7 @@ pub async fn migrate(db: &DatabaseConnection) -> Result<(), AppError> {
         backend.build(&schema.create_table_from_entity(models::view::Entity).if_not_exists().to_owned()),
         backend.build(&schema.create_table_from_entity(models::like::Entity).if_not_exists().to_owned()),
         backend.build(&schema.create_table_from_entity(models::share::Entity).if_not_exists().to_owned()),
+        backend.build(&schema.create_table_from_entity(models::zhuanlan::Entity).if_not_exists().to_owned()),
     ];
 
     for stmt in stmts {
@@ -48,6 +49,8 @@ async fn migrate_compat(db: &DatabaseConnection) -> Result<(), AppError> {
     rename_table_if_needed(db, "db_blog_messages", "blog_messages").await?;
     rename_table_if_needed(db, "db_blog_tags", "blog_tags").await?;
     rename_table_if_needed(db, "db_blog_views", "blog_views").await?;
+    rename_table_if_needed(db, "db_blog_zhuanlan", "blog_zhuanlan").await?;
+    rename_table_if_needed(db, "blog_zhuanlans", "blog_zhuanlan").await?;
 
     // 为所有业务表补齐通用审计字段
     let common_tables = [
@@ -59,6 +62,7 @@ async fn migrate_compat(db: &DatabaseConnection) -> Result<(), AppError> {
         "blog_share",
         "blog_tags",
         "blog_views",
+        "blog_zhuanlan",
     ];
     for table in common_tables {
         // 主键列兼容：旧库可能只有 id，没有 primary_id。

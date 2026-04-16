@@ -6,3 +6,4 @@ pub mod post;
 pub mod share;
 pub mod tag;
 pub mod view;
+pub mod zhuanlan;

@@ -1,10 +1,9 @@
-use axum::{extract::{Query, State}, response::IntoResponse};
+use axum::{extract::{Query, State}, response::IntoResponse, Json};
 use sea_orm::{EntityTrait, Order, QueryOrder};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     error::AppError,
-    handlers::common::ok,
     models::post,
     state::AppState,
     utils::content_to_abstract::content_to_abs,
@@ -32,11 +31,21 @@ pub struct PostListItem {
     /// 日期
     pub date: String,
     /// 摘要
+    #[serde(rename = "abstract")]
     pub abstract_text: String,
     /// 标签
     pub tags: String,
     /// 锁定状态
     pub lock: Option<i32>,
+}
+
+/// 文章列表响应
+#[derive(Debug, Serialize)]
+struct PostsResponse {
+    code: i32,
+    msg: String,
+    data: Vec<PostListItem>,
+    len: usize,
 }
 
 /// 获取文章列表
@@ -53,6 +62,7 @@ pub async fn handle(
         .await?;
 
     let start = (page - 1).saturating_mul(page_size);
+    let total_len = rows.len();
     let list = rows
         .into_iter()
         .skip(start)
@@ -67,5 +77,10 @@ pub async fn handle(
             lock: v.lock,
         })
         .collect::<Vec<_>>();
-    Ok(ok(list))
+    Ok(Json(PostsResponse {
+        code: 200,
+        msg: "success".to_string(),
+        data: list,
+        len: total_len,
+    }))
 }

@@ -21,6 +21,7 @@ pub struct PostDetail {
     /// 日期
     pub date: String,
     /// 摘要
+    #[serde(rename = "abstract")]
     pub abstract_text: String,
     /// 正文
     pub content: String,

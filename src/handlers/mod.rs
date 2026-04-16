@@ -1,4 +1,5 @@
 pub mod admin_login;
+pub mod auth;
 pub mod article_archives;
 pub mod article_archive;
 pub mod article_brother;
@@ -24,3 +25,5 @@ pub mod dashboard_view;
 pub mod dashboard_zhuanlan;
 pub mod hello;
 pub mod message;
+pub mod statistic;
+pub mod zhuanlan;
