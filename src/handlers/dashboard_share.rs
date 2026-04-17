@@ -18,7 +18,7 @@ pub struct DeleteShareBody {
 /// 获取分享（受保护）
 pub async fn get(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
     let rows = share::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({"msg":"get share success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新分享（受保护）
@@ -43,7 +43,7 @@ pub async fn put(
         .insert(&state.db)
         .await?;
     }
-    Ok(ok(serde_json::json!({"msg":"update share success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 删除分享（受保护）
@@ -59,5 +59,5 @@ pub async fn delete(
         let active: share::ActiveModel = row.into();
         active.delete(&state.db).await?;
     }
-    Ok(ok(serde_json::json!({"msg":"delete share success","data":"success"})))
+    Ok(ok("success"))
 }

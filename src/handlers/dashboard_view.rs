@@ -18,7 +18,7 @@ pub struct DeleteViewBody {
 /// 获取访问量（受保护）
 pub async fn get(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
     let rows = view::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({"msg":"get view success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新访问量（受保护）
@@ -43,7 +43,7 @@ pub async fn put(
         .insert(&state.db)
         .await?;
     }
-    Ok(ok(serde_json::json!({"msg":"update view success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 删除访问量（受保护）
@@ -59,5 +59,5 @@ pub async fn delete(
         let active: view::ActiveModel = row.into();
         active.delete(&state.db).await?;
     }
-    Ok(ok(serde_json::json!({"msg":"delete view success","data":"success"})))
+    Ok(ok("success"))
 }

@@ -18,7 +18,7 @@ pub struct DeleteLikeBody {
 /// 获取点赞（受保护）
 pub async fn get(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
     let rows = like::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({"msg":"get like success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新点赞（受保护）
@@ -43,7 +43,7 @@ pub async fn put(
         .insert(&state.db)
         .await?;
     }
-    Ok(ok(serde_json::json!({"msg":"update like success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 删除点赞（受保护）
@@ -59,5 +59,5 @@ pub async fn delete(
         let active: like::ActiveModel = row.into();
         active.delete(&state.db).await?;
     }
-    Ok(ok(serde_json::json!({"msg":"delete like success","data":"success"})))
+    Ok(ok("success"))
 }

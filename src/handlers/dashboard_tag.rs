@@ -31,7 +31,7 @@ pub async fn post(
     }
     .insert(&state.db)
     .await?;
-    Ok(ok(serde_json::json!({"msg":"add tag success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 获取标签（受保护）
@@ -47,7 +47,7 @@ pub async fn get(
     } else {
         tag::Entity::find().all(&state.db).await?
     };
-    Ok(ok(serde_json::json!({"msg":"get tag success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新标签（受保护）
@@ -63,9 +63,9 @@ pub async fn put(
         let mut active: tag::ActiveModel = row.into();
         active.tag = Set(body.tag);
         active.update(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"update tag success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"update tag failed","data":"fail"})))
+    Ok(ok("fail"))
 }
 
 /// 删除标签（受保护）
@@ -82,5 +82,5 @@ pub async fn delete(
         let active: tag::ActiveModel = row.into();
         active.delete(&state.db).await?;
     }
-    Ok(ok(serde_json::json!({"msg":"delete tag success","data":"success"})))
+    Ok(ok("success"))
 }

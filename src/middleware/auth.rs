@@ -18,6 +18,9 @@ pub async fn jwt_auth_middleware(
     if !path.starts_with("/api/dashboard") {
         return Ok(next.run(request).await);
     }
+    if state.config.debug {
+        return Ok(next.run(request).await);
+    }
 
     if request.method() == Method::OPTIONS {
         return Ok(next.run(request).await);

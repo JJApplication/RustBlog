@@ -37,7 +37,7 @@ pub async fn get(
     } else {
         comment::Entity::find().all(&state.db).await?
     };
-    Ok(ok(serde_json::json!({"msg":"get comment success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新评论（受保护）
@@ -49,9 +49,9 @@ pub async fn put(
         let mut active: comment::ActiveModel = row.into();
         active.comment = Set(body.comment);
         active.update(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"update comment success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"update comment failed","data":"fail"})))
+    Ok(ok("fail"))
 }
 
 /// 删除评论（受保护）
@@ -62,7 +62,7 @@ pub async fn delete(
     if let Some(row) = comment::Entity::find_by_id(body.id).one(&state.db).await? {
         let active: comment::ActiveModel = row.into();
         active.delete(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"delete comment success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"delete comment failed","data":"fail"})))
+    Ok(ok("fail"))
 }

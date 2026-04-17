@@ -23,6 +23,11 @@ use crate::{
 pub struct GetPostQuery {
     /// 文章名，可选
     pub name: Option<String>,
+    /// 页码，从1开始
+    pub page: Option<usize>,
+    /// 每页数量
+    #[serde(rename = "pageSize")]
+    pub page_size: Option<usize>,
 }
 
 /// 更新文章查询参数
@@ -103,15 +108,29 @@ pub async fn get(
             .filter(post::Column::Name.eq(name))
             .one(&state.db)
             .await?;
-        return Ok(ok(serde_json::json!({
-            "msg": "get post success",
+        return Ok(Json(serde_json::json!({
+            "code": 200,
+            "msg": "success",
             "data": row
         })));
     }
+    let page = q.page.unwrap_or(1).max(1);
+    let page_size = q.page_size.unwrap_or(5).max(1);
+
     let rows = post::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({
-        "msg": "get post success",
-        "data": rows
+    let total_len = rows.len();
+    let start = (page - 1).saturating_mul(page_size);
+    let list = rows
+        .into_iter()
+        .skip(start)
+        .take(page_size)
+        .collect::<Vec<_>>();
+
+    Ok(Json(serde_json::json!({
+        "code": 200,
+        "msg": "success",
+        "data": list,
+        "len": total_len
     })))
 }
 
@@ -125,16 +144,10 @@ pub async fn export(
             .filter(post::Column::Name.eq(name))
             .one(&state.db)
             .await?;
-        return Ok(ok(serde_json::json!({
-            "msg": if row.is_some() { "export data success" } else { "export data fail" },
-            "data": row
-        })));
+        return Ok(ok(serde_json::json!(row)));
     }
     let rows = post::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({
-        "msg": "export data success",
-        "data": rows
-    })))
+    Ok(ok(serde_json::json!(rows)))
 }
 
 /// 新增空白文章（POST /api/dashboard/post/add）
@@ -169,7 +182,7 @@ pub async fn add(
         ..Default::default()
     };
     model.insert(&state.db).await?;
-    Ok(ok(serde_json::json!({"msg":"post add success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 上传并写入文章（POST /api/dashboard/post/upload）
@@ -179,10 +192,10 @@ pub async fn upload(
 ) -> Result<impl IntoResponse, AppError> {
     let (file_name, content) = read_upload_md(multipart).await?;
     if !file_name.ends_with(".md") || content.len() >= 1024 * 100 {
-        return Ok(ok(serde_json::json!({"msg":"file invalid","data":"fail"})));
+        return Ok(ok("fail"));
     }
     if !check_article_ok(&content) {
-        return Ok(ok(serde_json::json!({"msg":"file check failed","data":"fail"})));
+        return Ok(ok("fail"));
     }
 
     let meta = parse_md_meta(&content);
@@ -229,23 +242,23 @@ pub async fn upload(
         .insert(&state.db)
         .await?;
     }
-    Ok(ok(serde_json::json!({"msg":"file upload success","data":"success"})))
+    Ok(ok("success"))
 }
 
 /// 上传解析回调（POST /api/dashboard/post/parse）
 pub async fn parse(multipart: Multipart) -> Result<impl IntoResponse, AppError> {
     let (_, content) = read_upload_md(multipart).await?;
     let meta = parse_md_meta(&content);
-    Ok(ok(serde_json::json!({"msg":"file parse success","data":meta})))
+    Ok(ok(meta))
 }
 
 /// 上传文件校验（POST /api/dashboard/post/check）
 pub async fn check(multipart: Multipart) -> Result<impl IntoResponse, AppError> {
     let (_, content) = read_upload_md(multipart).await?;
     if check_article_ok(&content) {
-        Ok(ok(serde_json::json!({"msg":"file check success","data":"success"})))
+        Ok(ok("success"))
     } else {
-        Ok(ok(serde_json::json!({"msg":"file check failed","data":"fail"})))
+        Ok(ok("fail"))
     }
 }
 
@@ -279,9 +292,9 @@ pub async fn delete(
     {
         let active: post::ActiveModel = v.into();
         active.delete(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"delete post success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"delete post failed","data":"fail"})))
+    Ok(ok("fail"))
 }
 
 async fn update_post_impl(
@@ -290,7 +303,7 @@ async fn update_post_impl(
     body: String,
 ) -> Result<impl IntoResponse, AppError> {
     let Some(update_type) = q.r#type else {
-        return Ok(ok(serde_json::json!({"msg":"type is empty","data":"fail"})));
+        return Ok(ok("fail"));
     };
 
     if update_type == "args" {
@@ -301,7 +314,7 @@ async fn update_post_impl(
             .one(&state.db)
             .await?
         else {
-            return Ok(ok(serde_json::json!({"msg":"update post failed","data":"fail"})));
+            return Ok(ok("fail"));
         };
         let mut active: post::ActiveModel = v.into();
         if let Some(n) = d.newname { active.name = Set(n); }
@@ -312,7 +325,7 @@ async fn update_post_impl(
         if let Some(lock) = d.lock { active.lock = Set(Some(lock)); }
         active.update_date = Set(Local::now().format("%Y-%m-%d %H:%M:%S").to_string());
         active.update(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"update post success","data":"success"})));
+        return Ok(ok("success"));
     }
 
     if update_type == "editor" {
@@ -323,7 +336,7 @@ async fn update_post_impl(
             .one(&state.db)
             .await?
         else {
-            return Ok(ok(serde_json::json!({"msg":"update post failed","data":"fail"})));
+            return Ok(ok("fail"));
         };
         let mut active: post::ActiveModel = v.into();
         if let Some(t) = d.title { active.title = Set(t); }
@@ -332,18 +345,18 @@ async fn update_post_impl(
         active.abstract_text = Set(content_to_abs("", &d.content, &state.config.app));
         active.update_date = Set(Local::now().format("%Y-%m-%d %H:%M:%S").to_string());
         active.update(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"update post success","data":"success"})));
+        return Ok(ok("success"));
     }
 
     if update_type == "file" {
         if q.name.clone().unwrap_or_default().is_empty() {
-            return Ok(ok(serde_json::json!({"msg":"name is empty","data":"fail"})));
+            return Ok(ok("fail"));
         }
         // file 模式需要 multipart，当前端走该模式请使用 /post/upload，更符合旧逻辑。
-        return Ok(ok(serde_json::json!({"msg":"please use /post/upload for file mode","data":"fail"})));
+        return Ok(ok("fail"));
     }
 
-    Ok(ok(serde_json::json!({"msg":"type is invalid","data":"fail"})))
+    Ok(ok("fail"))
 }
 
 async fn read_upload_md(mut multipart: Multipart) -> Result<(String, String), AppError> {

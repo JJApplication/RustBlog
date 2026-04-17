@@ -18,7 +18,7 @@ pub struct DeleteMessageBody {
 /// 获取留言（受保护）
 pub async fn get(State(state): State<AppState>) -> Result<impl IntoResponse, AppError> {
     let rows = message::Entity::find().all(&state.db).await?;
-    Ok(ok(serde_json::json!({"msg":"get message success","data":rows})))
+    Ok(ok(rows))
 }
 
 /// 更新留言（受保护）
@@ -30,9 +30,9 @@ pub async fn put(
         let mut active: message::ActiveModel = row.into();
         active.message = Set(body.message);
         active.update(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"update message success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"update message failed","data":"fail"})))
+    Ok(ok("fail"))
 }
 
 /// 删除留言（受保护）
@@ -43,7 +43,7 @@ pub async fn delete(
     if let Some(row) = message::Entity::find_by_id(body.id).one(&state.db).await? {
         let active: message::ActiveModel = row.into();
         active.delete(&state.db).await?;
-        return Ok(ok(serde_json::json!({"msg":"delete message success","data":"success"})));
+        return Ok(ok("success"));
     }
-    Ok(ok(serde_json::json!({"msg":"delete message failed","data":"fail"})))
+    Ok(ok("fail"))
 }
