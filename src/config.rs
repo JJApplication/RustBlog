@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use std::env;
 use std::fs;
 
 use crate::error::AppError;
@@ -117,7 +118,15 @@ impl AppConfig {
     /// 从TOML文件加载配置
     pub fn load_from_file(path: &str) -> Result<Self, AppError> {
         let content = fs::read_to_string(path)?;
-        let cfg = toml::from_str::<Self>(&content)?;
+        let mut cfg = toml::from_str::<Self>(&content)?;
+        if let Ok(port) = env::var("PORTS") {
+            let port = port.trim();
+            if !port.is_empty() {
+                cfg.server.http_port = port
+                    .parse::<u16>()
+                    .map_err(|_| AppError::BadRequest(format!("环境变量PORT无效: {port}")))?;
+            }
+        }
         Ok(cfg)
     }
 }

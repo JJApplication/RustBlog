@@ -8,6 +8,7 @@ pub mod article_likes;
 pub mod article_post;
 pub mod article_posts;
 pub mod article_search;
+pub mod article_share;
 pub mod article_tag;
 pub mod article_tags;
 pub mod article_views;

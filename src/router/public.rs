@@ -25,6 +25,10 @@ pub fn routes() -> Router<AppState> {
             "/article/likes",
             get(handlers::article_likes::get).post(handlers::article_likes::post),
         )
+        .route(
+            "/article/share",
+            get(handlers::article_share::get).post(handlers::article_share::post),
+        )
         .route("/article/views", get(handlers::article_views::handle))
         .route("/article/archive", get(handlers::article_archive::handle))
         .route("/article/archives", get(handlers::article_archives::handle))
